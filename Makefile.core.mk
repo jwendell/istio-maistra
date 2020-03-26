@@ -141,7 +141,7 @@ export ISTIO_OUT:=$(OUT_DIR)/$(GOOS)_$(GOARCH)/$(BUILDTYPE_DIR)
 export ISTIO_OUT_LINUX:=$(OUT_DIR)/linux_amd64/$(BUILDTYPE_DIR)
 export HELM=$(ISTIO_OUT)/helm
 export ARTIFACTS ?= $(ISTIO_OUT)
-export REPO_ROOT := $(shell git rev-parse --show-toplevel)
+export REPO_ROOT := $(shell git rev-parse --show-toplevel || echo ${ISTIO_GO})
 
 # scratch dir: this shouldn't be simply 'docker' since that's used for docker.save to store tar.gz files
 ISTIO_DOCKER:=${ISTIO_OUT_LINUX}/docker_temp
@@ -484,6 +484,10 @@ test: | $(JUNIT_REPORT)
 	KUBECONFIG="$${KUBECONFIG:-$${REPO_ROOT}/tests/util/kubeconfig}" \
 	$(MAKE) -f Makefile.core.mk --keep-going $(TEST_OBJ) \
 	2>&1 | tee >($(JUNIT_REPORT) > $(JUNIT_UNIT_TEST_XML))
+
+test-without-junit:
+	KUBECONFIG="$${KUBECONFIG:-$${REPO_ROOT}/tests/util/kubeconfig}" \
+	$(MAKE) -f Makefile.core.mk --keep-going $(TEST_OBJ)
 
 GOTEST_PARALLEL ?= '-test.parallel=1'
 

@@ -24,6 +24,7 @@ import (
 )
 
 func TestDownload(t *testing.T) {
+	t.Skip("Offline building/testing")
 	dir, err := ioutil.TempDir("", "envoy-download")
 	if err != nil {
 		t.Fatal(err)
