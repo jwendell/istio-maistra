@@ -27,6 +27,7 @@ import (
 	rawnetworking "istio.io/api/networking/v1alpha3"
 	rawsecurity "istio.io/api/security/v1beta1"
 	rawtype "istio.io/api/type/v1beta1"
+	"istio.io/istio/pilot/pkg/config/kube/ior"
 	"istio.io/istio/pkg/config"
 	"istio.io/istio/pkg/config/schema/collection"
 	"istio.io/istio/pkg/config/schema/collections"
@@ -364,6 +365,7 @@ func (c *Controller) discoveryIngressGateway(instance *v1.ServiceMeshPeer) *conf
 			GroupVersionKind: collections.IstioNetworkingV1Alpha3Gateways.Resource().GroupVersionKind(),
 			Name:             name,
 			Namespace:        instance.Namespace,
+			Annotations:      map[string]string{ior.ShouldManageRouteAnnotation: "false"},
 		},
 		Spec: &rawnetworking.Gateway{
 			Selector: federationIngressLabels(instance),
@@ -399,6 +401,7 @@ func (c *Controller) discoveryEgressGateway(instance *v1.ServiceMeshPeer) *confi
 			GroupVersionKind: collections.IstioNetworkingV1Alpha3Gateways.Resource().GroupVersionKind(),
 			Name:             name,
 			Namespace:        instance.Namespace,
+			Annotations:      map[string]string{ior.ShouldManageRouteAnnotation: "false"},
 		},
 		Spec: &rawnetworking.Gateway{
 			Selector: federationEgressLabels(instance),
