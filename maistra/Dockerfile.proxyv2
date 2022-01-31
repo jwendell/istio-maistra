@@ -1,0 +1,45 @@
+FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
+
+ARG VERSION
+ARG ISTIO_VERSION
+ARG PROXY_SHA
+
+LABEL com.redhat.component="maistra-proxyv2-container"
+LABEL name="maistra/proxyv2"
+LABEL version="${VERSION}"
+LABEL istio_version="${ISTIO_VERSION}"
+LABEL summary="Maistra Proxy V2 OpenShift container image"
+LABEL description="Maistra Istio Proxy V2 OpenShift container image"
+LABEL io.k8s.display-name="Maistra Istio Proxy V2"
+LABEL io.openshift.tags="istio"
+LABEL maintainer="Istio Feedback <istio-feedback@redhat.com>"
+LABEL io.openshift.expose-services=""
+ENV container="oci"
+ENV ISTIO_VERSION="${ISTIO_VERSION}"
+
+# Environment variables indicating this proxy's version/capabilities as opaque string
+ENV ISTIO_META_ISTIO_PROXY_VERSION "${ISTIO_VERSION}"
+# Environment variable indicating the exact proxy sha - for debugging or version-specific configs
+ENV ISTIO_META_ISTIO_PROXY_SHA "${PROXY_SHA}"
+# Environment variable indicating the exact build, for debugging
+ENV ISTIO_META_ISTIO_VERSION "${ISTIO_VERSION}"
+
+RUN microdnf update -y && \
+    microdnf install -y openssl && \
+    microdnf clean all
+
+# Copy Envoy bootstrap templates used by pilot-agent
+COPY envoy_bootstrap.json /var/lib/istio/envoy/envoy_bootstrap_tmpl.json
+COPY gcp_envoy_bootstrap.json /var/lib/istio/envoy/gcp_envoy_bootstrap_tmpl.json
+
+# Install Envoy.
+COPY envoy /usr/local/bin/envoy
+COPY pilot-agent /usr/local/bin/pilot-agent
+
+COPY stats-filter.wasm /etc/istio/extensions/stats-filter.wasm
+COPY stats-filter.compiled.wasm /etc/istio/extensions/stats-filter.compiled.wasm
+COPY metadata-exchange-filter.wasm /etc/istio/extensions/metadata-exchange-filter.wasm
+COPY metadata-exchange-filter.compiled.wasm /etc/istio/extensions/metadata-exchange-filter.compiled.wasm
+
+# The pilot-agent will bootstrap Envoy.
+ENTRYPOINT ["/usr/local/bin/pilot-agent"]

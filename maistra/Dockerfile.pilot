@@ -1,0 +1,29 @@
+FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
+
+ARG VERSION
+ARG ISTIO_VERSION
+
+LABEL com.redhat.component="maistra-pilot-container"
+LABEL name="maistra/pilot-ubi8"
+LABEL version="${VERSION}"
+LABEL istio_version="${ISTIO_VERSION}"
+LABEL summary="Red Hat Istio Pilot OpenShift container image"
+LABEL description="Red Hat Istio Pilot OpenShift container image"
+LABEL io.k8s.display-name="Red Hat Istio Pilot"
+LABEL io.openshift.tags="istio"
+LABEL maintainer="Istio Feedback <istio-feedback@redhat.com>"
+LABEL io.openshift.expose-services="15003:tcp,15005:tcp,15007:tcp,15010:tcp,15011:tcp,8080:tcp,9093:tcp"
+ENV container="oci"
+ENV ISTIO_VERSION="${ISTIO_VERSION}"
+
+RUN microdnf update -y && \
+    microdnf install -y podman util-linux && \
+    microdnf clean all
+
+COPY pilot-discovery /usr/local/bin/pilot-discovery
+
+# Copy templates for bootstrap generation.
+COPY envoy_bootstrap.json /var/lib/istio/envoy/envoy_bootstrap_tmpl.json
+COPY gcp_envoy_bootstrap.json /var/lib/istio/envoy/gcp_envoy_bootstrap_tmpl.json
+
+ENTRYPOINT [ "/usr/local/bin/pilot-discovery" ]
