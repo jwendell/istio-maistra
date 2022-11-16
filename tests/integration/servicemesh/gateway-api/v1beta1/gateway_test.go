@@ -60,7 +60,7 @@ func TestMain(m *testing.M) {
 		NewSuite(m).
 		RequireMaxClusters(1).
 		Setup(maistra.ApplyServiceMeshCRDs).
-		Setup(maistra.ApplyGatewayAPICRDs("v1beta1")).
+		Setup(maistra.ApplyGatewayAPICRDs()).
 		Setup(istio.Setup(&i, nil)).
 		Setup(deployment.SetupSingleNamespace(&apps, deployment.Config{})).
 		Setup(maistra.Install(maistra.InstallationOptions{EnableGatewayAPI: true})).
