@@ -101,6 +101,10 @@ check-go-tag:
 test.integration.%.kube: | $(JUNIT_REPORT) check-go-tag
 	$(call run-test,./tests/integration/$(subst .,/,$*)/...)
 
+xuxa: | $(JUNIT_REPORT) check-go-tag
+	$(call run-test,./tests/integration/pilot/)
+
+
 # Generate integration fuzz test targets for kubernetes environment.
 test.integration-fuzz.%.kube: | $(JUNIT_REPORT) check-go-tag
 	$(call run-test,./tests/integration/$(subst .,/,$*)/...,-tags="integfuzz integ")
